@@ -1,9 +1,10 @@
 package config
 
 import (
-	"fmt"
+	"log/slog"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -13,14 +14,24 @@ type DatabseConfig struct {
 	DatabaseTimeout int    `yaml:"database_timeout" env:"DATABASE_TIMEOUT"`
 }
 
+type Cache struct {
+	CacheUri            string        `yaml:"cache_uri" env:"CACHE_URI"`
+	CacheUserSessionTTL int64         `env:"CACHE_USER_SESSION_TTL"`
+	CachePoolSize       int           `env:"CACHE_POOL_SIZE"`
+	CachePoolTimeout    time.Duration `env:"CACHE_POOL_TIMEOUT"`
+}
+
 type Config struct {
-	Env      string `env:"ENV" yaml:"env"`
-	CacheUri string `yaml:"cache_uri" env:"CACHE_URI"`
+	Env     string `env:"ENV" yaml:"env"`
+	JsonLog bool   `yaml:"json_log" env:"JSON_LOG"`
+	MsgLog  bool   `yaml:"msg_log" env:"MSG_LOG"`
 
-	DB DatabseConfig
+	DB    DatabseConfig
+	Cache Cache
 
-	Host string `yaml:"host" env:"HOST"`
-	Port int    `yaml:"port" env:"PORT"`
+	PublishUrl string `env:"PUBLISH_URL"`
+	Host       string `yaml:"host" env:"HOST"`
+	Port       int    `yaml:"port" env:"PORT"`
 }
 
 var conf *Config
@@ -36,10 +47,13 @@ func Get() *Config {
 			conf = &Config{}
 
 			if err := cleanenv.ReadConfig(".env", conf); err != nil {
-				fmt.Printf("Error reading config file, %s\n", err)
 				if err := cleanenv.ReadEnv(conf); err != nil {
-					fmt.Printf("Error reading env, %s\n", err)
+					slog.Error("Error reading env", slog.Any("error", err))
+				} else {
+					slog.Info("Reading config ENV")
 				}
+			} else {
+				slog.Info("Reading config from .env file")
 			}
 		})
 

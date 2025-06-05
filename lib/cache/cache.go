@@ -27,7 +27,7 @@ func allPrefixes() string {
 }
 
 func NewCache(c *config.Config) (cache *Cache, err error) {
-	dsn := c.CacheUri
+	dsn := c.Cache.CacheUri
 	if dsn == "" {
 		fmt.Println("not using cache")
 		return
