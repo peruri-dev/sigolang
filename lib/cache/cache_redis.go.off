@@ -1,0 +1,46 @@
+package cache
+
+import (
+	"context"
+	"fmt"
+
+	"sigolang/config"
+	"github.com/redis/go-redis/v9"
+)
+
+func init() {
+	cacheFactories = append(cacheFactories, &CacheFactory{
+		Prefixes: []string{"redis://"},
+		Create: func(c *config.Config) (cache *Cache, err error) {
+			opts, err := redis.ParseURL(c.CacheUri)
+			if err != nil {
+				return nil, err
+			}
+
+			ctx := context.Background()
+
+			rdb := redis.NewClient(opts)
+			err = rdb.Ping(ctx).Err()
+			if err != nil {
+				return nil, fmt.Errorf("redis ping error: %w", err)
+			}
+
+			// rdb.AddHook()
+
+			fmt.Println("redis connected")
+
+			cache = &Cache{
+				Impl: rdb,
+			}
+
+			return cache, nil
+		},
+	})
+}
+
+func GetRDB(cache *Cache) *redis.Client {
+	if rdb, ok := cache.Impl.(*redis.Client); ok {
+		return rdb
+	}
+	return nil
+}

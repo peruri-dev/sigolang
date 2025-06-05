@@ -1,0 +1,40 @@
+package db
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+
+	"sigolang/config"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/sqlitedialect"
+	"github.com/uptrace/bun/driver/sqliteshim"
+	//sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
+)
+
+func init() {
+	bunFactories = append(bunFactories, &BunFactory{
+		Prefixes: []string{
+			"file:",
+		},
+		Opener: func(c *config.Config) (db *bun.DB, err error) {
+			dsn := c.DB.DatabaseUri
+
+			dbConn, err := sql.Open(sqliteshim.ShimName, dsn) // "file::memory:?cache=shared"
+			if err != nil {
+				return nil, err
+			}
+			db = bun.NewDB(dbConn, sqlitedialect.New(), bun.WithDiscardUnknownColumns())
+
+			ctx := context.Background()
+			_, err = db.NewSelect().ColumnExpr("1").Exec(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("error SELECT 1 sqlite: %w", err)
+			}
+
+			fmt.Println("sqlite connected")
+
+			return db, nil
+		},
+	})
+}
