@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"sigolang/config"
+	"sigolang/lib/httperror"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -12,9 +13,17 @@ func init() {
 	cacheFactories = append(cacheFactories, &CacheFactory{
 		Prefixes: []string{"redis://"},
 		Create: func(c *config.Config) (cache *Cache, err error) {
-			opts, err := redis.ParseURL(c.CacheUri)
+			opts, err := redis.ParseURL(c.Cache.CacheUri)
 			if err != nil {
 				return nil, err
+			}
+
+			if c.Cache.CachePoolSize != 0 {
+				opts.PoolSize = c.Cache.CachePoolSize
+			}
+
+			if c.Cache.CachePoolTimeout != 0 {
+				opts.PoolTimeout = c.Cache.CachePoolTimeout
 			}
 
 			ctx := context.Background()
@@ -42,5 +51,69 @@ func GetRDB(cache *Cache) *redis.Client {
 	if rdb, ok := cache.Impl.(*redis.Client); ok {
 		return rdb
 	}
+	return nil
+}
+
+
+func (c *Cache) Write(ctx context.Context, key string, value string, expiration time.Duration) error {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+
+	}
+	return rdb.Set(ctx, key, value, expiration).Err()
+}
+
+func (c *Cache) Read(ctx context.Context, key string) (string, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return "", httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+
+	}
+	return rdb.Get(ctx, key).Result()
+}
+
+func (c *Cache) GetHash(ctx context.Context, key string) (map[string]string, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return nil, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+
+	}
+
+	fields, err := rdb.HGetAll(ctx, key).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hash: %w", err)
+	}
+
+	return fields, nil
+}
+
+func (c *Cache) SetHash(ctx context.Context, key string, fields map[string]string, expiration time.Duration) error {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+
+	if err := rdb.HMSet(ctx, key, fields).Err(); err != nil {
+		return fmt.Errorf("failed to set hash: %w", err)
+	}
+
+	if err := rdb.Expire(ctx, key, expiration).Err(); err != nil {
+		return fmt.Errorf("failed to set expiration: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Cache) Delete(ctx context.Context, key string) error {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+
+	if err := rdb.Del(ctx, key).Err(); err != nil {
+		return fmt.Errorf("failed to delete key: %w", err)
+	}
+
 	return nil
 }
