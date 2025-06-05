@@ -10,11 +10,10 @@ import (
 	"sigolang/internal/service"
 	"sigolang/lib/cache"
 	"sigolang/lib/db"
+	"sigolang/lib/httpclient"
 	"sigolang/lib/transport"
 
 	"github.com/danielgtaylor/huma/v2/humacli"
-	"github.com/dubonzi/otelresty"
-	"github.com/go-resty/resty/v2"
 	"github.com/peruri-dev/inalog"
 	//"github.com/peruri-dev/inatrace/integrations/estrace"
 	//"github.com/peruri-dev/inatrace/integrations/ddtrace"
@@ -70,8 +69,6 @@ func Execute() {
 
 			svc := &service.Services{}
 
-			handler.RegisterRoutes(f, svc)
-
 			dbConn, err := db.Open(c)
 			if err != nil {
 				inalog.Log().Error("Error", slog.Any("error", err))
@@ -84,9 +81,9 @@ func Execute() {
 			}
 			svc.Cache = cache
 
-			svc.Resty = resty.New()
-			opts := []otelresty.Option{otelresty.WithTracerName("sigolang-resty")}
-			otelresty.TraceClient(svc.Resty, opts...)
+			svc.Resty = httpclient.InitRestyClient()
+
+			handler.RegisterRoutes(f, svc)
 
 			// Start your server here
 			err = f.Listen(fmt.Sprintf("%s:%d", c.Host, c.Port))
