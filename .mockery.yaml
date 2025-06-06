@@ -1,0 +1,17 @@
+with-expecter: True
+dir: mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }}
+mockname: "{{.InterfaceName}}"
+outpkg: "{{.PackageName}}"
+filename: "{{.InterfaceName}}.go"
+
+packages:
+  sigolang/internal/service:
+    # place your package-specific config here
+    #config:
+    #  all: True
+    interfaces:
+      ComplaintService: {}
+      # select the interfaces you want mocked
+      #Foo:
+      # Modify package-level config for this specific interface (if applicable)
+      #   config:
