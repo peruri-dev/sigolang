@@ -29,6 +29,14 @@ replace() {
   done
 }
 
+remote() {
+  URL=$(git remote get-url origin)
+  if [[ "$URL" == *"peruri-dev/sigolang"* ]]; then
+    git remote remove origin
+    git remote add sigolang "$URL"
+  else
+}
+
 read -p "Enter your project name [$starter]: " projectname
 echo "Using projectname: $projectname"
 
@@ -39,3 +47,4 @@ fi
 
 git co -b dev
 replace $starter $projectname
+remote
