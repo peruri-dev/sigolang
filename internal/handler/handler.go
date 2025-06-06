@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"sigolang/config"
 	"sigolang/internal/service"
 	"sigolang/lib/errs"
@@ -40,12 +38,12 @@ func RegisterRoutes(f *fiber.App, svc service.AllServices) huma.API {
 		},
 	}))
 
-	cfg := huma.DefaultConfig("Sigolang API", "0.0.1")
+	cfg := huma.DefaultConfig("sigolang API", "0.0.1")
 	if c.IsProduction() {
 		cfg.DocsPath = ""
 	}
 	cfg.Servers = []*huma.Server{
-		{URL: fmt.Sprintf("http://%s:%d", c.Host, c.Port)},
+		{URL: c.PublishUrl},
 	}
 
 	api := humafiber.New(f, cfg)

@@ -34,7 +34,7 @@ remote() {
   if [[ "$URL" == *"peruri-dev/sigolang"* ]]; then
     git remote remove origin
     git remote add sigolang "$URL"
-  else
+  fi
 }
 
 read -p "Enter your project name [$starter]: " projectname
