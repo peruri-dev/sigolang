@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"time"
 
@@ -15,7 +17,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/peruri-dev/inalog"
-	//"github.com/peruri-dev/inatrace/integrations/estrace"
+	"github.com/peruri-dev/inatrace/integrations/octrace"
 	//"github.com/peruri-dev/inatrace/integrations/ddtrace"
 )
 
@@ -53,6 +55,7 @@ func Execute() {
 		})
 		//inalog.AddHook(estrace.ExtractTraceSpanID)
 		//inalog.AddHook(ddtrace.ExtractTraceSpanID)
+		inalog.AddHook(octrace.ExtractTraceSpanID)
 
 		f := transport.InitFiber(c)
 
@@ -60,12 +63,14 @@ func Execute() {
 			//tp := ddtrace.InitTracerDD()
 			// OR:
 			//tp := estrace.InitTracerES()
+			// OR:
+			tp := octrace.InitTracerOC("sigolang", "v0.0.1")
 
-			// defer func() {
-			// 	if err := tp.Shutdown(context.Background()); err != nil {
-			// 		log.Printf("Error shutting down tracer provider: %v", err)
-			// 	}
-			// }()
+			defer func() {
+				if err := tp.Shutdown(context.Background()); err != nil {
+					log.Printf("Error shutting down tracer provider: %v", err)
+				}
+			}()
 
 			svc := &service.Services{}
 
