@@ -56,6 +56,24 @@ func Execute() {
 
 		f := transport.InitFiber(c)
 
+		svc := &service.Services{}
+
+		dbConn, err := db.Open(c)
+		if err != nil {
+			inalog.Log().Error("Error", slog.Any("error", err))
+		}
+		svc.DB = dbConn
+
+		cache, err := cache.NewCache(c)
+		if err != nil {
+			inalog.Log().Error("Error", slog.Any("error", err))
+		}
+		svc.Cache = cache
+
+		svc.Resty = httpclient.InitRestyClient()
+
+		handler.RegisterRoutes(f, svc)
+
 		hooks.OnStart(func() {
 			//tp := ddtrace.InitTracerDD()
 			// OR:
@@ -66,24 +84,6 @@ func Execute() {
 			// 		log.Printf("Error shutting down tracer provider: %v", err)
 			// 	}
 			// }()
-
-			svc := &service.Services{}
-
-			dbConn, err := db.Open(c)
-			if err != nil {
-				inalog.Log().Error("Error", slog.Any("error", err))
-			}
-			svc.DB = dbConn
-
-			cache, err := cache.NewCache(c)
-			if err != nil {
-				inalog.Log().Error("Error", slog.Any("error", err))
-			}
-			svc.Cache = cache
-
-			svc.Resty = httpclient.InitRestyClient()
-
-			handler.RegisterRoutes(f, svc)
 
 			// Start your server here
 			err = f.Listen(fmt.Sprintf("%s:%d", c.Host, c.Port))
@@ -102,16 +102,7 @@ func Execute() {
 	rootCmd.Use = "sigolang"
 	rootCmd.Version = "0.0.1"
 
-	rootCmd.AddCommand(dbInitCmd)
-	rootCmd.AddCommand(dbMigrateCmd)
-	rootCmd.AddCommand(dbRollbackCmd)
-	rootCmd.AddCommand(dbLockCmd)
-	rootCmd.AddCommand(dbUnlockCmd)
-	rootCmd.AddCommand(dbCreateGoCmd)
-	rootCmd.AddCommand(dbCreateSqlCmd)
-	rootCmd.AddCommand(dbStatusCmd)
-	rootCmd.AddCommand(dbMarkAppliedCmd)
-
+	AddDBCommands(rootCmd)
 	rootCmd.AddCommand(dbSeedCmd)
 	rootCmd.AddCommand(openapiCmd)
 
