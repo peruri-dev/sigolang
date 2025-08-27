@@ -50,6 +50,7 @@ func Execute() {
 
 		inalog.Init(inalog.Cfg{
 			Source: true,
+			Tinted: !c.JsonLog,
 		})
 		//inalog.AddHook(estrace.ExtractTraceSpanID)
 		//inalog.AddHook(ddtrace.ExtractTraceSpanID)
