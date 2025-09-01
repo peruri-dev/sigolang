@@ -1,22 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	"log/slog"
-	"time"
-
 	"sigolang/config"
-	"sigolang/internal/handler"
-	"sigolang/internal/service"
-	"sigolang/lib/cache"
-	"sigolang/lib/db"
-	"sigolang/lib/httpclient"
-	"sigolang/lib/transport"
+	"sigolang/internal/app"
 
 	"github.com/danielgtaylor/huma/v2/humacli"
-	"github.com/peruri-dev/inalog"
-	//"github.com/peruri-dev/inatrace/integrations/estrace"
-	//"github.com/peruri-dev/inatrace/integrations/ddtrace"
 )
 
 type Options struct {
@@ -47,56 +35,9 @@ func Execute() {
 	// Then, create the CLI.
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
 		c := applyOptions(opts)
-
-		inalog.Init(inalog.Cfg{
-			Source: true,
-			Tinted: !c.JsonLog,
-		})
-		//inalog.AddHook(estrace.ExtractTraceSpanID)
-		//inalog.AddHook(ddtrace.ExtractTraceSpanID)
-
-		f := transport.InitFiber(c)
-
-		svc := &service.Services{}
-
-		dbConn, err := db.Open(c)
-		if err != nil {
-			inalog.Log().Error("Error", slog.Any("error", err))
-		}
-		svc.DB = dbConn
-
-		cache, err := cache.NewCache(c)
-		if err != nil {
-			inalog.Log().Error("Error", slog.Any("error", err))
-		}
-		svc.Cache = cache
-
-		svc.Resty = httpclient.InitRestyClient()
-
-		handler.RegisterRoutes(f, svc)
-
-		hooks.OnStart(func() {
-			//tp := ddtrace.InitTracerDD()
-			// OR:
-			//tp := estrace.InitTracerES()
-
-			// defer func() {
-			// 	if err := tp.Shutdown(context.Background()); err != nil {
-			// 		log.Printf("Error shutting down tracer provider: %v", err)
-			// 	}
-			// }()
-
-			// Start your server here
-			err = f.Listen(fmt.Sprintf("%s:%d", c.Host, c.Port))
-			if err != nil {
-				inalog.Log().Error("Error", slog.Any("error", err))
-			}
-		})
-
-		hooks.OnStop(func() {
-			// Gracefully shutdown your server here
-			f.ShutdownWithTimeout(5 * time.Second)
-		})
+		a := app.NewApp(c)
+		hooks.OnStart(a.Start)
+		hooks.OnStop(a.Stop)
 	})
 
 	rootCmd := cli.Root()
