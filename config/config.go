@@ -22,9 +22,10 @@ type Cache struct {
 }
 
 type Config struct {
-	Env     string `env:"ENV" yaml:"env"`
-	JsonLog bool   `yaml:"json_log" env:"JSON_LOG"`
-	MsgLog  bool   `yaml:"msg_log" env:"MSG_LOG"`
+	Env            string `env:"ENV" yaml:"env"`
+	JsonLog        bool   `yaml:"json_log" env:"JSON_LOG"`
+	MsgLog         bool   `yaml:"msg_log" env:"MSG_LOG"`
+	StartupMessage bool   `env:"STARTUP_MESSAGE"`
 
 	DB    DatabseConfig
 	Cache Cache

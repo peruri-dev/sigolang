@@ -8,7 +8,7 @@ import (
 
 func InitFiber(c *config.Config) *fiber.App {
 	f := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
+		DisableStartupMessage: !c.StartupMessage,
 	})
 
 	return f
