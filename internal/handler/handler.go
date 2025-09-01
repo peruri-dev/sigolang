@@ -53,7 +53,7 @@ func RegisterRoutes(f *fiber.App, svc service.AllServices) huma.API {
 		svc,
 	}
 
-	h.RegisterUser(api)
+	h.RoutesUser(api)
 
 	f.Static("/", "./public")
 	f.Use(NotFound)

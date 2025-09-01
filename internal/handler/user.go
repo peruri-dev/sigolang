@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/peruri-dev/inalog"
 	"github.com/peruri-dev/inatrace"
-	"github.com/danielgtaylor/huma/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/exp/rand"
@@ -108,31 +108,34 @@ func (h *Handler) NotifyUser(ctx context.Context, input *struct{}) (*struct {
 	}, nil
 }
 
-func (h *Handler) RegisterUser(api huma.API) {
+func (h *Handler) RoutesUser(api huma.API) {
 	huma.Register(api,
 		huma.Operation{
-			OperationID: "get-users",
+			OperationID: "GetUsers",
 			Method:      http.MethodGet,
 			Path:        "/api/users",
 			Summary:     "Get a bunch of users",
+			Tags:        []string{"User"},
 		}, h.GetUsers,
 	)
 
 	huma.Register(api,
 		huma.Operation{
-			OperationID: "create-user",
+			OperationID: "CreateUser",
 			Method:      http.MethodPost,
 			Path:        "/api/users",
-			Summary:     "Create a user",
+			Summary:     "Create an user",
+			Tags:        []string{"User"},
 		}, h.CreateUser,
 	)
 
 	huma.Register(api,
 		huma.Operation{
-			OperationID: "notify-user",
+			OperationID: "NotifyUser",
 			Method:      http.MethodPut,
 			Path:        "/api/users/notify",
 			Summary:     "Notify a user",
+			Tags:        []string{"User"},
 		}, h.NotifyUser,
 	)
 }
