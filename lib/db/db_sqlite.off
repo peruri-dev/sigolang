@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"sigolang/config"
 	"github.com/uptrace/bun"
@@ -32,7 +33,7 @@ func init() {
 				return nil, fmt.Errorf("error SELECT 1 sqlite: %w", err)
 			}
 
-			fmt.Println("sqlite connected")
+			slog.Info("sqlite connected")
 
 			return db, nil
 		},

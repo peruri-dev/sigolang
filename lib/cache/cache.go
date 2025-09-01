@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"sigolang/config"
@@ -29,7 +30,7 @@ func allPrefixes() string {
 func NewCache(c *config.Config) (cache *Cache, err error) {
 	dsn := c.Cache.CacheUri
 	if dsn == "" {
-		fmt.Println("not using cache")
+		slog.Info("not using cache")
 		return
 	}
 

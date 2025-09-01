@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"sigolang/config"
@@ -11,7 +12,10 @@ import (
 
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"github.com/uptrace/bun/extra/bundebug"
 	//sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
+	//"github.com/uptrace/bun/extra/bunotel"
+
 )
 
 func init() {
@@ -34,6 +38,11 @@ func init() {
 			//db.SetMaxOpenConns(config.DatabaseMaxConns)
 			//db.SetMaxIdleConns(config.DatabaseMaxIdleConns)
 			//db.SetConnMaxLifetime(time.Duration(config.DatabaseConnMaxLifetime) * time.Second)
+			//db.AddQueryHook(bunotel.NewQueryHook(bunotel.WithDBName("mydb")))
+
+			if c.IsDevelopment() {
+				db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
+			}
 
 			ctx := context.Background()
 			_, err = db.NewSelect().ColumnExpr("1").Exec(ctx)
@@ -41,7 +50,7 @@ func init() {
 				return nil, fmt.Errorf("error SELECT 1 postresql: %w", err)
 			}
 
-			fmt.Println("postresql connected")
+			slog.Info("postresql connected")
 
 			return db, nil
 		},

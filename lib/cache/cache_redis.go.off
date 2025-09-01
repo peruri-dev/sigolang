@@ -3,10 +3,14 @@ package cache
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"net/http"
+	"time"
 
 	"sigolang/config"
 	"sigolang/lib/httperror"
 	"github.com/redis/go-redis/v9"
+	// "github.com/redis/go-redis/extra/redisotel/v9"
 )
 
 func init() {
@@ -34,9 +38,13 @@ func init() {
 				return nil, fmt.Errorf("redis ping error: %w", err)
 			}
 
-			// rdb.AddHook()
+			// Add the OpenTelemetry hook to your Redis client
+			// https://github.com/redis/go-redis?tab=readme-ov-file#instrument-with-opentelemetry
+			// if err := errors.Join(redisotel.InstrumentTracing(rdb), redisotel.InstrumentMetrics(rdb)); err != nil {
+        	//   slog.Error("unable to instrumenting redis", slog.Any("error", err))
+    		// }
 
-			fmt.Println("redis connected")
+			slog.Info("redis connected")
 
 			cache = &Cache{
 				Impl: rdb,
