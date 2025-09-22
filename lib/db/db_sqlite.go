@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"sigolang/config"
+
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
-	//sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
 )
 
 func init() {
@@ -17,8 +18,8 @@ func init() {
 		Prefixes: []string{
 			"file:",
 		},
-		Opener: func(c *config.Config) (db *bun.DB, err error) {
-			dsn := c.DB.DatabaseUri
+		Opener: func(c *config.DatabaseConfig) (db *bun.DB, err error) {
+			dsn := c.DatabaseUri
 
 			dbConn, err := sql.Open(sqliteshim.ShimName, dsn) // "file::memory:?cache=shared"
 			if err != nil {
@@ -32,7 +33,7 @@ func init() {
 				return nil, fmt.Errorf("error SELECT 1 sqlite: %w", err)
 			}
 
-			fmt.Println("sqlite connected")
+			slog.Info("sqlite connected", slog.String("dsn", dsn))
 
 			return db, nil
 		},

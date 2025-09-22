@@ -2,8 +2,16 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"sync"
+)
+
+var (
+	executableName string
+	once           sync.Once
 )
 
 func GetCurrentProjectRoot() (string, error) {
@@ -21,4 +29,27 @@ func GetCurrentProjectRoot() (string, error) {
 	projectRoot = filepath.Clean(projectRoot)
 
 	return projectRoot, nil
+}
+
+func GetExecutableName() string {
+	if executableName != "" {
+		return executableName
+	}
+
+	once.Do(func() {
+		executableName = "sigolang"
+		ex, err := os.Executable()
+
+		if err == nil {
+			dir := filepath.Dir(ex)
+			if strings.Contains(dir, "go-build") {
+				return
+			}
+			if exeName := filepath.Base(ex); exeName != "" {
+				executableName = exeName
+			}
+		}
+	})
+
+	return executableName
 }

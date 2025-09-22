@@ -8,11 +8,11 @@
 * **redis**: `go-redis/v9`.
 * **swagger**: `huma`.
 * **httpclient**: `resty`.
-* **apm/tracing***: `otel` with `inatrace` (backend `datadog`, TODO `elastic`)
+* **apm/tracing***: `otel` with `inatrace` (backend `uptrace`)
 
 ## Project Structures
 
-* cmd: for cli commands
+* cmd: for cli commandsS
 * config: configuration
 * db/migrations: db migration steps
 * internal/handler: handlers for API
@@ -28,9 +28,9 @@ To enable connectors rename by ommiting `.off` suffix, then do `go mod tidy`.
 
 Install mockery command to generate interfece mock
 
-as go 1.22
+as go 1.25.1
 ```
-$ go install github.com/vektra/mockery/v2@v2.46.0
+$ go install github.com/vektra/mockery/v3@v3.5.4
 ```
 
 To re-generate mock from interface:

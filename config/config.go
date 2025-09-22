@@ -2,6 +2,7 @@ package config
 
 import (
 	"log/slog"
+	"sigolang/lib/util"
 	"strings"
 	"sync"
 	"time"
@@ -9,9 +10,15 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-type DatabseConfig struct {
-	DatabaseUri     string `yaml:"database_uri" env:"DATABASE_URI"`
-	DatabaseTimeout int    `yaml:"database_timeout" env:"DATABASE_TIMEOUT"`
+type DatabaseConfig struct {
+	DatabaseUri             string `yaml:"database_uri" env:"DATABASE_URI"`
+	DatabaseTimeout         int    `yaml:"database_timeout" env:"DATABASE_TIMEOUT"`
+	DatabaseMaxOpenConns    int    `env:"DATABASE_MAX_OPEN_CONNS" yaml:"database_max_open_conns" env-default:"5"`
+	DatabaseMaxIdleConns    int    `env:"DATABASE_MAX_IDLE_CONNS" yaml:"database_max_idle_conns" env-default:"1"`
+	DatabaseConnMaxLifetime int    `env:"DATABASE_CONN_MAX_LIFETIME" yaml:"database_conn_max_lifetime" env-default:"15"`
+	DatabaseConnMaxIdletime int    `env:"DATABASE_CONN_MAX_IDELTIME" yaml:"database_conn_max_ideltime" env-default:"5"`
+	DatabaseDebug           int    `yaml:"database_debug" env:"DATABASE_DEBUG"`
+	DatabaseSlog            bool   `yaml:"database_slog" env:"DATABASE_SLOG"`
 }
 
 type Cache struct {
@@ -22,11 +29,14 @@ type Cache struct {
 }
 
 type Config struct {
-	Env     string `env:"ENV" yaml:"env"`
-	JsonLog bool   `yaml:"json_log" env:"JSON_LOG"`
-	MsgLog  bool   `yaml:"msg_log" env:"MSG_LOG"`
+	AppVersion     string `env:"-"`
+	ServiceName    string `env:"SERVICE_NAME" yaml:"service_name"`
+	Env            string `env:"ENV" yaml:"env"`
+	JsonLog        bool   `yaml:"json_log" env:"JSON_LOG"`
+	MsgLog         bool   `yaml:"msg_log" env:"MSG_LOG"`
+	StartupMessage bool   `env:"STARTUP_MESSAGE" yaml:"startup_message"`
 
-	DB    DatabseConfig
+	DB    DatabaseConfig
 	Cache Cache
 
 	PublishUrl string `env:"PUBLISH_URL"`
@@ -55,7 +65,12 @@ func Get() *Config {
 			} else {
 				slog.Info("Reading config from .env file")
 			}
-		})
+
+			if conf.ServiceName == "" {
+				conf.ServiceName = util.GetExecutableName()
+			}
+		},
+	)
 
 	return conf
 }

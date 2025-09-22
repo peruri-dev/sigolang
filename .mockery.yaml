@@ -1,17 +1,12 @@
-with-expecter: True
-dir: mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }}
-mockname: "{{.InterfaceName}}"
-outpkg: "{{.PackageName}}"
+# version: go install github.com/vektra/mockery/v3@v3.5.4
+dir: mocks/{{ replaceAll "internal" "internal_" .InterfaceDirRelative }}
+structname: '{{.InterfaceName}}'
+pkgname: "{{.SrcPackageName}}"
 filename: "{{.InterfaceName}}.go"
-
+template: testify
+template-data:
+  unroll-variadic: true
 packages:
-  sigolang/internal/service:
-    # place your package-specific config here
-    #config:
-    #  all: True
+  sigoleng/internal/service:
     interfaces:
-      ComplaintService: {}
-      # select the interfaces you want mocked
-      #Foo:
-      # Modify package-level config for this specific interface (if applicable)
-      #   config:
+      AllServices: {}

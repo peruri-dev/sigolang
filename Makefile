@@ -1,7 +1,9 @@
 GOPATH_BIN:=$(shell go env GOPATH)/bin
+APP_VERSION:=$(shell git rev-parse --short HEAD)
 
 build:
-	CGO_ENABLED=0 go build -o ./sigolang ./main.go
+	CGO_ENABLED=0 \
+		go build -ldflags="-X 'main.AppVersion=$(APP_VERSION)'" -o ./sigolang
 
 test:
 	go test -v ./...
@@ -37,3 +39,15 @@ test-ci:
 lint-ci:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH_BIN) v1.64.6
 	$(GOPATH_BIN)/golangci-lint run
+
+docker-build: app-version
+	docker build . -t sigolang:latest
+
+docker-run:
+	docker run --rm --env-file=.env --network=host -it sigolang:latest
+
+docker-sh:
+	docker run --entrypoint=sh --rm --env-file=.env --network=host -it sigolang:latest
+
+app-version:
+	echo $(APP_VERSION) > APP_VERSION

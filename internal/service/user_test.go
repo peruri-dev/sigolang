@@ -23,7 +23,7 @@ func TestUserServiceTestSuite(t *testing.T) {
 func (suite *UserServiceTestSuite) SetupSuite() {
 	c := testconfig.ReloadTestConfig()
 
-	dbConn, err := db.Open(c)
+	dbConn, err := db.Open(&c.DB)
 	if err != nil {
 		suite.T().Skipf("please enable db_sqlite: %s", err.Error())
 	}

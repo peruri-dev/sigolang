@@ -37,7 +37,7 @@ func (suite *UserHandlerTestSuite) SetupSuite() {
 	h := &Handler{
 		suite.mockSvc,
 	}
-	h.RegisterUser(api)
+	h.RoutesUser(api)
 }
 
 func (suite *UserHandlerTestSuite) TestListUsersReturnEmpty() {

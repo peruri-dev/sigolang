@@ -23,7 +23,7 @@ var dbSeedCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		dbConn, err := db.Open(c)
+		dbConn, err := db.Open(&c.DB)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
