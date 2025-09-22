@@ -7,19 +7,16 @@ import (
 	"sigolang/config"
 )
 
-type Cache struct {
-	Impl    any
-	Version string
-}
-
-var _ ICache = (*Cache)(nil)
-
 type CacheFactory struct {
 	Prefixes []string
-	Create   func(*config.CacheConfig) (*Cache, error)
+	Create   func(*config.CacheConfig) (ICache, error)
 }
 
 var cacheFactories []*CacheFactory = []*CacheFactory{}
+
+func RegisterCache(factory *CacheFactory) {
+	cacheFactories = append(cacheFactories, factory)
+}
 
 func allPrefixes() string {
 	prefixes := []string{}
@@ -29,7 +26,7 @@ func allPrefixes() string {
 	return strings.Join(prefixes, "|")
 }
 
-func NewCache(c *config.CacheConfig) (cache *Cache, err error) {
+func NewCache(c *config.CacheConfig) (cache ICache, err error) {
 	dsn := c.CacheUri
 	if dsn == "" {
 		return

@@ -26,17 +26,22 @@ type DBCommands struct {
 type DBCommandsOptions struct {
 	DBConn     *bun.DB
 	Migrations *migrate.Migrations
+	Options    []migrate.MigratorOption
 }
 
 type GetDBCommandsOptions func() *DBCommandsOptions
 
 func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
+	var createMigrator = func(opts *DBCommandsOptions) *migrate.Migrator {
+		return migrate.NewMigrator(opts.DBConn, opts.Migrations, opts.Options...)
+	}
+
 	var dbInitCmd = &cobra.Command{
 		Use:   "db:init",
 		Short: "create migration tables",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			err := migrator.Init(cmd.Context())
 			if err != nil {
@@ -51,7 +56,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "migrate database",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			group, err := migrator.Migrate(cmd.Context())
 			if err != nil {
@@ -74,7 +79,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "rollback the last migration group",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			group, err := migrator.Rollback(cmd.Context())
 			if err != nil {
@@ -97,7 +102,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "lock migrations",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			err := migrator.Lock(cmd.Context())
 			if err != nil {
@@ -113,7 +118,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "unlock migrations",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			err := migrator.Unlock(cmd.Context())
 			if err != nil {
@@ -129,7 +134,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "create Go migration",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			name := strings.Join(args, "_")
 			mf, err := migrator.CreateGoMigration(cmd.Context(), name)
@@ -147,7 +152,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "create up and down SQL migrations",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			name := strings.Join(args, "_")
 			files, err := migrator.CreateSQLMigrations(cmd.Context(), name)
@@ -168,7 +173,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "print migrations status",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			ms, err := migrator.MigrationsWithStatus(cmd.Context())
 			if err != nil {
@@ -177,9 +182,21 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 				return
 			}
 
-			fmt.Printf("migrations: %s\n", ms)
-			fmt.Printf("unapplied migrations: %s\n", ms.Unapplied())
-			fmt.Printf("last migration group: %s\n", ms.LastGroup())
+			ms.LastGroupID()
+
+			fmt.Printf("migrations:\n")
+			for i := range ms {
+				applied := "      "
+				if ms[i].IsApplied() {
+					id := fmt.Sprintf("%4d", ms[i].GroupID)
+
+					applied = id
+					if ms[i].GroupID == ms.LastGroupID() {
+						applied += " 🔚"
+					}
+				}
+				fmt.Printf("- [%s] %s\n", applied, ms[i].String())
+			}
 		},
 	}
 
@@ -188,7 +205,7 @@ func NewDBCommands(getOpts GetDBCommandsOptions) *DBCommands {
 		Short: "mark migrations as applied without actually running them",
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := getOpts()
-			migrator := migrate.NewMigrator(opts.DBConn, opts.Migrations)
+			migrator := createMigrator(opts)
 
 			group, err := migrator.Migrate(cmd.Context(), migrate.WithNopMigration())
 			if err != nil {

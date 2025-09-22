@@ -10,6 +10,8 @@ import (
 	"sigolang/lib/db"
 
 	"github.com/spf13/cobra"
+
+	"github.com/uptrace/bun/migrate"
 )
 
 func AddDBCommands(rootCmd *cobra.Command) {
@@ -25,6 +27,7 @@ func AddDBCommands(rootCmd *cobra.Command) {
 		return &libcmd.DBCommandsOptions{
 			DBConn:     dbConn,
 			Migrations: migrations.Migrations,
+			Options:    []migrate.MigratorOption{migrate.WithMarkAppliedOnSuccess(true)},
 		}
 	}
 
