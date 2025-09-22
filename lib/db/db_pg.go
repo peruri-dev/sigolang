@@ -13,7 +13,6 @@ import (
 
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
-	"github.com/uptrace/bun/extra/bunotel"
 	//sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
 )
 
@@ -41,7 +40,6 @@ func init() {
 			db.SetMaxIdleConns(c.DatabaseMaxIdleConns)
 			db.SetConnMaxLifetime(time.Duration(c.DatabaseConnMaxLifetime) * time.Minute)
 			db.SetConnMaxIdleTime(time.Duration(c.DatabaseConnMaxIdletime) * time.Minute)
-			db.AddQueryHook(bunotel.NewQueryHook(bunotel.WithDBName("mydb")))
 
 			ctx := context.Background()
 			_, err = db.NewSelect().ColumnExpr("1").Exec(ctx)

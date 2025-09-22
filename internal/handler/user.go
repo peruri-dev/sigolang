@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	"math/rand/v2"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/peruri-dev/inalog"
 	"github.com/peruri-dev/inatrace"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"golang.org/x/exp/rand"
 )
 
 type UserResponseBody struct {
@@ -92,11 +93,11 @@ func (h *Handler) NotifyUser(ctx context.Context, input *struct{}) (*struct {
 	_, span := inatrace.Start(ctx, "sendNotification", trace.WithAttributes(attribute.String("id", "id")))
 	defer span.End()
 
-	n := rand.Intn(3) // n will be between 0 and 2
+	n := rand.IntN(3) // n will be between 0 and 2
 	inalog.LogWith(inalog.WithCfg{Ctx: ctx}).Info("Sleeping", slog.Int("durataion", n))
 	time.Sleep(time.Duration(n) * time.Second)
 
-	n = rand.Intn(3) // n will be between 0 and 2
+	n = rand.IntN(3) // n will be between 0 and 2
 	if n == 0 {
 		fmt.Println("div", 1/n)
 	}

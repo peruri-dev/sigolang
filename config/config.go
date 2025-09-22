@@ -67,9 +67,10 @@ func Get() *Config {
 			}
 
 			if conf.ServiceName == "" {
-				conf.ServiceName = util.GetExecutablePath()
+				conf.ServiceName = util.GetExecutableName()
 			}
-		})
+		},
+	)
 
 	return conf
 }

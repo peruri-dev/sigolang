@@ -33,6 +33,9 @@ func applyOptions(opts *Options) *config.Config {
 }
 
 func Execute(appVersion string) {
+	c := config.Get()
+	c.AppVersion = appVersion
+
 	// Then, create the CLI.
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
 		c := applyOptions(opts)
@@ -42,8 +45,8 @@ func Execute(appVersion string) {
 	})
 
 	rootCmd := cli.Root()
-	rootCmd.Use = util.GetExecutablePath()
-	rootCmd.Version = appVersion
+	rootCmd.Use = util.GetExecutableName()
+	rootCmd.Version = c.AppVersion
 
 	AddDBCommands(rootCmd)
 	rootCmd.AddCommand(dbSeedCmd)

@@ -39,6 +39,7 @@ lint-ci:
 	$(GOPATH_BIN)/golangci-lint run
 
 docker-build:
+	git rev-parse --short HEAD > APP_VERSION
 	docker build . -t sigolang:latest
 
 docker-run:

@@ -14,6 +14,16 @@ type stackTracer interface {
 }
 
 func ErrorField(err error) slog.Attr {
+	stack := ErrToStack(err)
+	cause := errors.Cause(err)
+	return slog.Group("error",
+		"kind", reflect.TypeOf(cause).String(),
+		"stack", stack,
+		"message", err.Error(),
+	)
+}
+
+func ErrToStack(err error) string {
 	var stack string
 	if serr, ok := err.(stackTracer); ok {
 		st := serr.StackTrace()
@@ -22,10 +32,5 @@ func ErrorField(err error) slog.Attr {
 			stack = stack[1:]
 		}
 	}
-	cause := errors.Cause(err)
-	return slog.Group("error",
-		"kind", reflect.TypeOf(cause).String(),
-		"stack", stack,
-		"message", err.Error(),
-	)
+	return stack
 }
