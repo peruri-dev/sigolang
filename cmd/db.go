@@ -16,7 +16,7 @@ func AddDBCommands(rootCmd *cobra.Command) {
 	getOpts := func() *libcmd.DBCommandsOptions {
 		c := config.Get()
 
-		dbConn, err := db.Open(c)
+		dbConn, err := db.Open(&c.DB)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)

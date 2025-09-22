@@ -1,8 +1,10 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"sigolang/config"
 	"sigolang/internal/handler"
 	"sigolang/internal/service"
@@ -14,8 +16,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/peruri-dev/inalog"
-	//"github.com/peruri-dev/inatrace/integrations/estrace"
-	//"github.com/peruri-dev/inatrace/integrations/ddtrace"
+	"github.com/peruri-dev/inalog/integrations/logtint"
+	"github.com/peruri-dev/inatrace/integrations/uptrace"
 )
 
 type App struct {
@@ -24,12 +26,20 @@ type App struct {
 }
 
 func NewApp(c *config.Config) *App {
-	inalog.Init(inalog.Cfg{
-		Source: true,
-		Tinted: !c.JsonLog,
-	})
-	//inalog.AddHook(estrace.ExtractTraceSpanID)
-	//inalog.AddHook(ddtrace.ExtractTraceSpanID)
+	os.Setenv("INALOG_LOG_LEVEL", c.AppVersion)
+	os.Setenv("INALOG_SERVICE_NAME", "sigolang")
+	os.Setenv("INALOG_SERVICE_ENV", c.Env)
+	os.Setenv("INALOG_SERVICE_VERSION", c.AppVersion)
+
+	cfg := inalog.Cfg{
+		Source:  true,
+		TextLog: !c.JsonLog,
+	}
+	if !c.JsonLog {
+		cfg.CustomFunc = logtint.CreateTintHandler()
+	}
+	inalog.Init(cfg)
+	inalog.AddHook(uptrace.ExtractTraceSpanID)
 
 	return &App{
 		c: c,
@@ -42,15 +52,15 @@ func (app *App) Start() {
 
 	svc := &service.Services{}
 
-	dbConn, err := db.Open(app.c)
+	dbConn, err := db.Open(&app.c.DB)
 	if err != nil {
-		inalog.Log().Error("Error", slog.Any("error", err))
+		slog.Error("Error", slog.Any("error", err))
 	}
 	svc.DB = dbConn
 
-	cache, err := cache.NewCache(app.c)
+	cache, err := cache.NewCache(&app.c.Cache)
 	if err != nil {
-		inalog.Log().Error("Error", slog.Any("error", err))
+		slog.Error("Error", slog.Any("error", err))
 	}
 	svc.Cache = cache
 
@@ -58,20 +68,18 @@ func (app *App) Start() {
 
 	handler.RegisterRoutes(app.f, svc)
 
-	//tp := ddtrace.InitTracerDD()
-	// OR:
-	//tp := estrace.InitTracerES()
+	tracer := uptrace.InitTracer("inagov-be", app.c.AppVersion)
 
-	// defer func() {
-	// 	if err := tp.Shutdown(context.Background()); err != nil {
-	// 		log.Printf("Error shutting down tracer provider: %v", err)
-	// 	}
-	// }()
+	defer func() {
+		if err := tracer.Shutdown(context.Background()); err != nil {
+			slog.Error("Error shutting down tracer provider", slog.Any("error", err))
+		}
+	}()
 
 	// Start your server here
 	err = f.Listen(fmt.Sprintf("%s:%d", app.c.Host, app.c.Port))
 	if err != nil {
-		inalog.Log().Error("Error", slog.Any("error", err))
+		slog.Error("Error", slog.Any("error", err))
 	}
 }
 

@@ -14,7 +14,7 @@ type Cache struct {
 
 type CacheFactory struct {
 	Prefixes []string
-	Create   func(*config.Config) (*Cache, error)
+	Create   func(*config.Cache) (*Cache, error)
 }
 
 var cacheFactories []*CacheFactory = []*CacheFactory{}
@@ -27,8 +27,8 @@ func allPrefixes() string {
 	return strings.Join(prefixes, "|")
 }
 
-func NewCache(c *config.Config) (cache *Cache, err error) {
-	dsn := c.Cache.CacheUri
+func NewCache(c *config.Cache) (cache *Cache, err error) {
+	dsn := c.CacheUri
 	if dsn == "" {
 		slog.Info("not using cache")
 		return
