@@ -37,3 +37,12 @@ test-ci:
 lint-ci:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH_BIN) v1.64.6
 	$(GOPATH_BIN)/golangci-lint run
+
+docker-build:
+	docker build . -t sigolang:latest
+
+docker-run:
+	docker run --rm --env-file=.env --network=host -it sigolang:latest
+
+docker-sh:
+	docker run --entrypoint=sh --rm --env-file=.env --network=host -it sigolang:latest

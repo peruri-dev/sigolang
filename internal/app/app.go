@@ -27,7 +27,7 @@ type App struct {
 
 func NewApp(c *config.Config) *App {
 	os.Setenv("INALOG_LOG_LEVEL", c.AppVersion)
-	os.Setenv("INALOG_SERVICE_NAME", "sigolang")
+	os.Setenv("INALOG_SERVICE_NAME", c.ServiceName)
 	os.Setenv("INALOG_SERVICE_ENV", c.Env)
 	os.Setenv("INALOG_SERVICE_VERSION", c.AppVersion)
 
@@ -68,7 +68,7 @@ func (app *App) Start() {
 
 	handler.RegisterRoutes(app.f, svc)
 
-	tracer := uptrace.InitTracer("inagov-be", app.c.AppVersion)
+	tracer := uptrace.InitTracer(app.c.ServiceName, app.c.AppVersion)
 
 	defer func() {
 		if err := tracer.Shutdown(context.Background()); err != nil {

@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 )
@@ -21,4 +22,12 @@ func GetCurrentProjectRoot() (string, error) {
 	projectRoot = filepath.Clean(projectRoot)
 
 	return projectRoot, nil
+}
+
+func GetExecutablePath() string {
+	executablePath, err := os.Executable()
+	if err != nil {
+		executablePath = "sigolang"
+	}
+	return executablePath
 }

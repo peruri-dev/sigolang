@@ -2,6 +2,7 @@ package config
 
 import (
 	"log/slog"
+	"sigolang/lib/util"
 	"strings"
 	"sync"
 	"time"
@@ -29,10 +30,11 @@ type Cache struct {
 
 type Config struct {
 	AppVersion     string `env:"-"`
+	ServiceName    string `env:"SERVICE_NAME" yaml:"service_name"`
 	Env            string `env:"ENV" yaml:"env"`
 	JsonLog        bool   `yaml:"json_log" env:"JSON_LOG"`
 	MsgLog         bool   `yaml:"msg_log" env:"MSG_LOG"`
-	StartupMessage bool   `env:"STARTUP_MESSAGE"`
+	StartupMessage bool   `env:"STARTUP_MESSAGE" yaml:"startup_message"`
 
 	DB    DatabaseConfig
 	Cache Cache
@@ -62,6 +64,10 @@ func Get() *Config {
 				}
 			} else {
 				slog.Info("Reading config from .env file")
+			}
+
+			if conf.ServiceName == "" {
+				conf.ServiceName = util.GetExecutablePath()
 			}
 		})
 

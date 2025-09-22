@@ -3,6 +3,7 @@ package cmd
 import (
 	"sigolang/config"
 	"sigolang/internal/app"
+	"sigolang/lib/util"
 
 	"github.com/danielgtaylor/huma/v2/humacli"
 )
@@ -31,7 +32,7 @@ func applyOptions(opts *Options) *config.Config {
 	return c
 }
 
-func Execute() {
+func Execute(appVersion string) {
 	// Then, create the CLI.
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
 		c := applyOptions(opts)
@@ -41,8 +42,8 @@ func Execute() {
 	})
 
 	rootCmd := cli.Root()
-	rootCmd.Use = "sigolang"
-	rootCmd.Version = "0.0.1"
+	rootCmd.Use = util.GetExecutablePath()
+	rootCmd.Version = appVersion
 
 	AddDBCommands(rootCmd)
 	rootCmd.AddCommand(dbSeedCmd)
