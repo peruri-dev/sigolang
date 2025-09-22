@@ -14,7 +14,7 @@ RUN VERSION=$(cat APP_VERSION) && \
 FROM cgr.dev/chainguard/wolfi-base
 
 COPY --from=builder /workdir/app .
-
+COPY --from=builder /workdir/public /public
 COPY --from=builder /workdir/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
