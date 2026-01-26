@@ -29,3 +29,7 @@ go.work.sum
 
 # SQLite DB
 db/*.db
+
+# Executable
+sigolang
+sigolang.exe

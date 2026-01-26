@@ -1,4 +1,4 @@
-# version: go install github.com/vektra/mockery/v3@v3.5.4
+# version: go install github.com/vektra/mockery/v3@v3.6.0
 dir: mocks/{{ replaceAll "internal" "internal_" .InterfaceDirRelative }}
 structname: '{{.InterfaceName}}'
 pkgname: "{{.SrcPackageName}}"
@@ -7,6 +7,6 @@ template: testify
 template-data:
   unroll-variadic: true
 packages:
-  sigoleng/internal/service:
+  sigolang/internal/service:
     interfaces:
       AllServices: {}

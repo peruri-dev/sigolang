@@ -11,16 +11,25 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/peruri-dev/inalog v1.7.0
-	github.com/peruri-dev/inatrace v1.1.0
+	github.com/peruri-dev/inalog/integrations/logtint v1.0.0
+	github.com/peruri-dev/inatrace v1.1.1
+	github.com/peruri-dev/inatrace/integrations/uptrace v1.0.3
 	github.com/pkg/errors v0.9.1
+	github.com/redis/go-redis/extra/redisotel/v9 v9.14.0
+	github.com/redis/go-redis/v9 v9.14.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
+	github.com/tidwall/pretty v1.2.1
 	github.com/uptrace/bun v1.2.15
+	github.com/uptrace/bun/dialect/pgdialect v1.2.15
+	github.com/uptrace/bun/dialect/sqlitedialect v1.2.15
+	github.com/uptrace/bun/driver/pgdriver v1.2.15
+	github.com/uptrace/bun/driver/sqliteshim v1.2.15
 	github.com/uptrace/bun/extra/bundebug v1.2.15
 	github.com/uptrace/bun/extra/bunotel v1.2.15
+	github.com/uptrace/bun/extra/bunslog v1.2.15
 	go.opentelemetry.io/otel v1.37.0
 	go.opentelemetry.io/otel/trace v1.37.0
-	golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc
 )
 
 require (
@@ -40,36 +49,24 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/lmittmann/tint v1.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.28 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/peruri-dev/inalog/integrations/logtint v1.0.0 // indirect
-	github.com/peruri-dev/inatrace/integrations/uptrace v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.14.0 // indirect
-	github.com/redis/go-redis/extra/redisotel/v9 v9.14.0 // indirect
-	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
-	github.com/uptrace/bun/dialect/pgdialect v1.2.15 // indirect
-	github.com/uptrace/bun/dialect/sqlitedialect v1.2.15 // indirect
-	github.com/uptrace/bun/driver/pgdriver v1.2.15 // indirect
-	github.com/uptrace/bun/driver/sqliteshim v1.2.15 // indirect
-	github.com/uptrace/bun/extra/bunslog v1.2.15 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.2 // indirect
 	github.com/uptrace/uptrace-go v1.37.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.66.0 // indirect
-	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
@@ -87,6 +84,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.37.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.7.1 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
+	golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect

@@ -21,7 +21,7 @@ type DatabaseConfig struct {
 	DatabaseSlog            bool   `yaml:"database_slog" env:"DATABASE_SLOG"`
 }
 
-type Cache struct {
+type CacheConfig struct {
 	CacheUri            string        `yaml:"cache_uri" env:"CACHE_URI"`
 	CacheUserSessionTTL int64         `env:"CACHE_USER_SESSION_TTL"`
 	CachePoolSize       int           `env:"CACHE_POOL_SIZE"`
@@ -37,7 +37,7 @@ type Config struct {
 	StartupMessage bool   `env:"STARTUP_MESSAGE" yaml:"startup_message"`
 
 	DB    DatabaseConfig
-	Cache Cache
+	Cache CacheConfig
 
 	PublishUrl string `env:"PUBLISH_URL"`
 	Host       string `yaml:"host" env:"HOST"`

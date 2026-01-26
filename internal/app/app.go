@@ -21,12 +21,14 @@ import (
 )
 
 type App struct {
-	f *fiber.App
-	c *config.Config
+	f   *fiber.App
+	c   *config.Config
+	svc *service.Services
 }
 
 func NewApp(c *config.Config) *App {
 	os.Setenv("INALOG_LOG_LEVEL", c.AppVersion)
+	os.Setenv("INALOG_ACCESS_LOG", "DEBUG")
 	os.Setenv("INALOG_SERVICE_NAME", c.ServiceName)
 	os.Setenv("INALOG_SERVICE_ENV", c.Env)
 	os.Setenv("INALOG_SERVICE_VERSION", c.AppVersion)
@@ -46,7 +48,7 @@ func NewApp(c *config.Config) *App {
 	}
 }
 
-func (app *App) Start() {
+func (app *App) Init() {
 	f := transport.InitFiber(app.c)
 	app.f = f
 
@@ -54,19 +56,33 @@ func (app *App) Start() {
 
 	dbConn, err := db.Open(&app.c.DB)
 	if err != nil {
-		slog.Error("Error", slog.Any("error", err))
+		slog.Error("error opening database", slog.String("DB", app.c.DB.DatabaseUri), slog.Any("error", err))
+	} else if dbConn == nil {
+		slog.Warn("not using database")
 	}
 	svc.DB = dbConn
 
 	cache, err := cache.NewCache(&app.c.Cache)
 	if err != nil {
-		slog.Error("Error", slog.Any("error", err))
+		slog.Error("error opening cache", slog.String("Cache", app.c.Cache.CacheUri), slog.Any("error", err))
+	} else if cache == nil {
+		slog.Warn("not using cache")
 	}
 	svc.Cache = cache
 
 	svc.Resty = httpclient.InitRestyClient()
 
-	handler.RegisterRoutes(app.f, svc)
+	app.svc = svc
+}
+
+func (app *App) Routes() {
+
+	handler.RegisterRoutes(app.f, app.svc)
+}
+
+func (app *App) Start() {
+	var err error
+	app.Init()
 
 	tracer := uptrace.InitTracer(app.c.ServiceName, app.c.AppVersion)
 
@@ -76,8 +92,11 @@ func (app *App) Start() {
 		}
 	}()
 
+	// Init Routers
+	app.Routes()
+
 	// Start your server here
-	err = f.Listen(fmt.Sprintf("%s:%d", app.c.Host, app.c.Port))
+	err = app.f.Listen(fmt.Sprintf("%s:%d", app.c.Host, app.c.Port))
 	if err != nil {
 		slog.Error("Error", slog.Any("error", err))
 	}

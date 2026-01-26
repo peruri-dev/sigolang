@@ -36,7 +36,6 @@ func Open(c *config.DatabaseConfig) (db *bun.DB, err error) {
 	dsn := c.DatabaseUri
 
 	if dsn == "" {
-		fmt.Println("not using database")
 		return
 	}
 

@@ -15,16 +15,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type FieldValue struct {
-	Field string
-	Value string
-	TTL   time.Duration
-}
-
 func init() {
 	cacheFactories = append(cacheFactories, &CacheFactory{
 		Prefixes: []string{"redis://"},
-		Create: func(c *config.Cache) (cache *Cache, err error) {
+		Create: func(c *config.CacheConfig) (cache *Cache, err error) {
 			opts, err := redis.ParseURL(c.CacheUri)
 			if err != nil {
 				return nil, err
@@ -69,10 +63,11 @@ func init() {
 				}
 			}
 
-			slog.Info(fmt.Sprintf("redis connected URI:%s Version:%s", c.CacheUri, version), slog.String("version", version))
+			slog.Info(fmt.Sprintf("redis connected URI:%s Version:%s", c.CacheUri, version))
 
 			cache = &Cache{
-				Impl: rdb,
+				Impl:    rdb,
+				Version: version,
 			}
 
 			return cache, nil
@@ -94,6 +89,22 @@ func (c *Cache) Write(ctx context.Context, key string, value string, expiration 
 
 	}
 	return rdb.Set(ctx, key, value, expiration).Err()
+}
+
+func (c *Cache) Lock(ctx context.Context, key string, value string, expiration time.Duration) (bool, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return false, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+	return rdb.SetNX(ctx, key, value, expiration).Result()
+}
+
+func (c *Cache) UnLock(ctx context.Context, key string) (int64, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return 0, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+	return rdb.Del(ctx, key).Result()
 }
 
 func (c *Cache) Read(ctx context.Context, key string) (string, error) {
@@ -141,7 +152,12 @@ func (c *Cache) SetHash(ctx context.Context, key string, fields map[string]strin
 		return httperror.GenericError("Redis client not available", http.StatusInternalServerError)
 	}
 
-	if err := rdb.HMSet(ctx, key, fields).Err(); err != nil {
+	// TODO: this should be deprecated
+	// if err := rdb.HMSet(ctx, key, fields).Err(); err != nil {
+	// 	return fmt.Errorf("failed to set hash: %w", err)
+	// }
+
+	if err := rdb.HSet(ctx, key, fields).Err(); err != nil {
 		return fmt.Errorf("failed to set hash: %w", err)
 	}
 
@@ -163,6 +179,12 @@ func (c *Cache) Delete(ctx context.Context, key string) error {
 	}
 
 	return nil
+}
+
+type FieldValue struct {
+	Field string
+	Value string
+	TTL   time.Duration
 }
 
 // SetHashFieldsTTL perform HSET then HEXPIRE
@@ -198,4 +220,22 @@ func (c *Cache) SetHashFieldsTTL(ctx context.Context, hashKey string, fieldValue
 	}
 
 	return nil
+}
+
+func (c *Cache) Incr(ctx context.Context, key string) (int64, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return 0, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+
+	return rdb.Incr(ctx, key).Result()
+}
+
+func (c *Cache) Expire(ctx context.Context, key string, expiration time.Duration) error {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+
+	return rdb.Expire(ctx, key, expiration).Err()
 }
