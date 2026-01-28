@@ -33,6 +33,7 @@ type Config struct {
 	ServiceName    string `env:"SERVICE_NAME" yaml:"service_name"`
 	Env            string `env:"ENV" yaml:"env"`
 	JsonLog        bool   `yaml:"json_log" env:"JSON_LOG"`
+	ViteDist       bool   `env:"VITE_DIST" env-default:"false"`
 	MsgLog         bool   `yaml:"msg_log" env:"MSG_LOG"`
 	StartupMessage bool   `env:"STARTUP_MESSAGE" yaml:"startup_message"`
 

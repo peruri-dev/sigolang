@@ -76,7 +76,6 @@ func (app *App) Init() {
 }
 
 func (app *App) Routes() {
-
 	handler.RegisterRoutes(app.f, app.svc)
 }
 

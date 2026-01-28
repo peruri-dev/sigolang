@@ -1,4 +1,4 @@
-# EnvMan
+# sigolang
 
 * **mux**: `fiber` over `humafiber`.
 * **logging**: `inalog`.

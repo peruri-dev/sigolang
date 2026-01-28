@@ -1,6 +1,8 @@
 package main
 
-import "sigolang/cmd"
+import (
+	"sigolang/cmd"
+)
 
 var AppVersion string = "local"
 
