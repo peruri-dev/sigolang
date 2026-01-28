@@ -1,0 +1,13 @@
+# Exclude the local node_modules directory
+node_modules
+
+# Frontend dist
+frontend/dist
+
+# Optionally, exclude other common development files/directories
+.git
+.gitignore
+.dockerignore
+.vscode
+npm-debug.log*
+

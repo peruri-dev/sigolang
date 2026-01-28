@@ -44,7 +44,7 @@ func RegisterFrontend(f *fiber.App) bool {
 			return false
 		}
 
-		slog.Info("Serving frontend vite-dev at /")
+		slog.Info(fmt.Sprintf("Serving frontend vite-dev at %d", c.VitePort))
 
 		f.Static("/src/assets", "./src/assets")
 	}

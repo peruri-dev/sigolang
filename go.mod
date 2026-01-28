@@ -10,6 +10,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jarcoal/httpmock v1.3.1
+	github.com/olivere/vite v0.1.0
 	github.com/peruri-dev/inalog v1.7.0
 	github.com/peruri-dev/inalog/integrations/logtint v1.0.0
 	github.com/peruri-dev/inatrace v1.1.1
@@ -55,7 +56,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.28 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/olivere/vite v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.14.0 // indirect
