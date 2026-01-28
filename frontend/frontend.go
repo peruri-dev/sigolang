@@ -1,18 +1,13 @@
+//go:build !dist
+
 package frontend
 
 import (
-	"embed"
 	"io/fs"
+	"os"
 )
 
-//go:embed all:dist
-var dist embed.FS
-
 func GetDist() fs.FS {
-	fs, err := fs.Sub(dist, "dist")
-	if err != nil {
-		panic(err)
-	}
-
+	fs := os.DirFS("./frontend/dist")
 	return fs
 }

@@ -21,6 +21,7 @@
 * lib/cache: cache eg. redis
 * lib/db: database eg. postres
 * lib/transport: fiber and endpoints or routes
+* src: frontend
 
 To enable connectors rename by ommiting `.off` suffix, then do `go mod tidy`.
 
@@ -37,6 +38,34 @@ To re-generate mock from interface:
 
 ```
 $ mockery --all
+```
+
+## Frontend
+
+To run frontend dev server:
+
+```
+$ VITE_PORT=5173 npm run dev
+```
+
+Then access may be accessed thru backend:
+
+```
+$ VITE_PORT=5173 go run main.go
+```
+
+### With dist / production build
+
+Build frontend into `./frontend/dist`:
+
+```
+$ npm run build
+```
+
+Then may be accessed thru backend with frontend embeddedly:
+
+```
+$ go run -tags dist main.go
 ```
 
 # React + TypeScript + Vite

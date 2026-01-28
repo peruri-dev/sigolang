@@ -34,6 +34,7 @@ type Config struct {
 	Env            string `env:"ENV" yaml:"env"`
 	JsonLog        bool   `yaml:"json_log" env:"JSON_LOG"`
 	ViteDist       bool   `env:"VITE_DIST" env-default:"false"`
+	VitePort       int    `env:"VITE_PORT" env-default:"5173"`
 	MsgLog         bool   `yaml:"msg_log" env:"MSG_LOG"`
 	StartupMessage bool   `env:"STARTUP_MESSAGE" yaml:"startup_message"`
 

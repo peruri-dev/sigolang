@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"sigolang/config"
@@ -35,7 +36,7 @@ func RegisterFrontend(f *fiber.App) bool {
 		viteHandler, err = vite.NewHandler(vite.Config{
 			FS:      os.DirFS("."),
 			IsDev:   true,
-			ViteURL: "http://localhost:5173",
+			ViteURL: fmt.Sprintf("http://localhost:%d", c.VitePort),
 		})
 
 		if err != nil {
