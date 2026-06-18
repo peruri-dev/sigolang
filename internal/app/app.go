@@ -9,8 +9,10 @@ import (
 	"sigolang/internal/handler"
 	"sigolang/internal/service"
 	"sigolang/lib/cache"
+	"sigolang/lib/cache/redisc"
 	"sigolang/lib/db"
 	"sigolang/lib/httpclient"
+	"sigolang/lib/storage/s3minio"
 	"sigolang/lib/transport"
 	"time"
 
@@ -19,6 +21,11 @@ import (
 	"github.com/peruri-dev/inalog/integrations/logtint"
 	"github.com/peruri-dev/inatrace/integrations/uptrace"
 )
+
+func init() {
+	s3minio.RegisterMinioStorage()
+	redisc.RegisterRedisCache()
+}
 
 type App struct {
 	f *fiber.App
