@@ -1,6 +1,6 @@
 module sigolang
 
-go 1.25.1
+go 1.26.4
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.24.0
