@@ -24,7 +24,7 @@ type FieldValue struct {
 func init() {
 	cacheFactories = append(cacheFactories, &CacheFactory{
 		Prefixes: []string{"redis://"},
-		Create: func(c *config.Cache) (cache *Cache, err error) {
+		Create: func(c *config.CacheConfig) (cache *Cache, err error) {
 			opts, err := redis.ParseURL(c.CacheUri)
 			if err != nil {
 				return nil, err

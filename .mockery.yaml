@@ -7,6 +7,6 @@ template: testify
 template-data:
   unroll-variadic: true
 packages:
-  sigoleng/internal/service:
+  sigolang/internal/service:
     interfaces:
       AllServices: {}
