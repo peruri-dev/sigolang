@@ -24,30 +24,13 @@ type DatabaseConfig struct {
 }
 
 type CacheConfig struct {
-<<<<<<< HEAD
-=======
 	// redis://<CACHE_USER>:<CACHE_PASSWORD>@<CACHE_END>:<CACHE_PORT>/<CACHE_DB>
->>>>>>> 9743c32 (chore: remove unused docker-entrypoint.sh)
 	CacheUri            string        `yaml:"cache_uri" env:"CACHE_URI"`
 	CacheUserSessionTTL int64         `env:"CACHE_USER_SESSION_TTL"`
 	CachePoolSize       int           `env:"CACHE_POOL_SIZE"`
 	CachePoolTimeout    time.Duration `env:"CACHE_POOL_TIMEOUT"`
 }
 
-<<<<<<< HEAD
-type Config struct {
-	AppVersion     string `env:"-"`
-	ServiceName    string `env:"SERVICE_NAME" yaml:"service_name"`
-	Env            string `env:"ENV" yaml:"env"`
-	JsonLog        bool   `yaml:"json_log" env:"JSON_LOG"`
-	ViteDist       bool   `env:"VITE_DIST" env-default:"false"`
-	VitePort       int    `env:"VITE_PORT" env-default:"5173"`
-	MsgLog         bool   `yaml:"msg_log" env:"MSG_LOG"`
-	StartupMessage bool   `env:"STARTUP_MESSAGE" yaml:"startup_message"`
-
-	DB    DatabaseConfig
-	Cache CacheConfig
-=======
 type StorageConfig struct {
 	// s3://<STORAGE_ACCESS_KEY>:<STORAGE_SECRET_KEY>@<STORAGE_ENDPOINT>/<STORAGE_BUCKET_NAME>?sslmode=<STORAGE_USE_SSL:enable>
 	StorageUri string `env:"STORAGE_URI"`
@@ -71,7 +54,6 @@ type Config struct {
 	DB      DatabaseConfig
 	Cache   CacheConfig
 	Storage StorageConfig
->>>>>>> 9743c32 (chore: remove unused docker-entrypoint.sh)
 
 	PublishUrl string `env:"PUBLISH_URL"`
 	Host       string `yaml:"host" env:"HOST"`
@@ -80,6 +62,9 @@ type Config struct {
 	DDService                string `env:"DD_SERVICE"`
 	OTELExporterOTLPEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT"`
 	UptraceDSN               string `env:"UPTRACE_DSN"`
+
+	ViteDist bool `env:"VITE_DIST" env-default:"false"`
+	VitePort int  `env:"VITE_PORT" env-default:"5173"`
 }
 
 var conf *Config
