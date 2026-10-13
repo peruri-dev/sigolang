@@ -1,29 +1,4 @@
-# Use an official Node.js runtime as a parent image
-FROM node:24-alpine AS base
-
-WORKDIR /workdir
-
-FROM base AS install
-
-# install node modules for build
-RUN mkdir -p /temp/dev
-COPY package*.json /temp/dev/
-RUN cd /temp/dev && npm install
-
-FROM base AS build
-
-COPY --from=install /temp/dev/node_modules node_modules
-
-# Copy the rest of the application code
-COPY . .
-
-# Copy env that needed for build
-COPY .env .env
-
-# Build the frontend to dist
-RUN npm run build
-
-FROM cgr.dev/chainguard/go AS builder
+FROM cgr.dev/chainguard/go:latest AS builder
 
 WORKDIR /workdir
 
@@ -38,7 +13,7 @@ RUN VERSION=$(cat APP_VERSION) && \
 
 # --- Runtime ---
 #FROM cgr.dev/chainguard/static
-FROM cgr.dev/chainguard/wolfi-base
+FROM cgr.dev/chainguard/wolfi-base:latest
 
 COPY --from=builder /workdir/app .
 #COPY --from=builder /workdir/public /public

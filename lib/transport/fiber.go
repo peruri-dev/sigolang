@@ -3,14 +3,18 @@ package transport
 import (
 	"sigolang/config"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 func InitFiber(c *config.Config) *fiber.App {
+
 	f := fiber.New(fiber.Config{
-		DisableStartupMessage: !c.StartupMessage,
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
+		BodyLimit: 30 * 1024 * 1024,
+
+		ErrorHandler: func(c fiber.Ctx, err error) error {
 			// Check if the error is a panic recovered by the middleware
+			//if recErr, ok := err.(*fiber.Error); ok && recErr.Code == fiber.StatusInternalServerError {}
+
 			// Customize the JSON response for panics
 			if wasPanic, ok := c.Locals("panic").(bool); ok {
 				if wasPanic {

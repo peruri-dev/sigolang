@@ -7,8 +7,9 @@ import (
 	"sigolang/config"
 	"sigolang/frontend"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/adaptor"
+	"github.com/gofiber/fiber/v3/middleware/static"
 	"github.com/olivere/vite"
 )
 
@@ -31,7 +32,14 @@ func RegisterFrontend(f *fiber.App) bool {
 		}
 
 		slog.Info("Serving frontend vite-dist")
-		//f.Static("/", "./dist")
+		//f.Get("/", mStatic.New("./dist"))
+
+		f.Get("/assets/*", adaptor.HTTPHandler(viteHandler))
+		f.Get("/*", func(c fiber.Ctx) error {
+			// slog.Info("route path: " + c.Route().Path + ", path: " + c.Path())
+			c.RequestCtx().Request.SetRequestURI("/index.html")
+			return adaptor.HTTPHandler(viteHandler)(c)
+		})
 	} else {
 		viteHandler, err = vite.NewHandler(vite.Config{
 			FS:      os.DirFS("."),
@@ -46,9 +54,16 @@ func RegisterFrontend(f *fiber.App) bool {
 
 		slog.Info(fmt.Sprintf("Serving frontend vite-dev at %d", c.VitePort))
 
-		f.Static("/src/assets", "./src/assets")
+		f.Get("/src/assets/*", static.New("./src/assets"))
+
+		// In dev mode, use All to handle all HTTP methods (needed for HMR websockets)
+		// and properly proxy all requests to the Vite dev server
+		f.All("/*", func(c fiber.Ctx) error {
+			//slog.Info("route path: " + c.Route().Path + ", path: " + c.Path())
+			c.RequestCtx().Request.SetRequestURI("/index.html")
+			return adaptor.HTTPHandler(viteHandler)(c)
+		})
 	}
 
-	f.Use(adaptor.HTTPHandler(viteHandler))
 	return true
 }

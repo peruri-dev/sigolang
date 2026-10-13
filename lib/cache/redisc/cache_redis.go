@@ -1,7 +1,8 @@
-package cache
+package redisc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -9,16 +10,21 @@ import (
 	"time"
 
 	"sigolang/config"
+	"sigolang/lib/cache"
 	"sigolang/lib/httperror"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
 
-func init() {
-	cacheFactories = append(cacheFactories, &CacheFactory{
+type Cache struct {
+	Impl interface{}
+}
+
+func RegisterRedisCache() {
+	cache.RegisterCache(&cache.CacheFactory{
 		Prefixes: []string{"redis://"},
-		Create: func(c *config.CacheConfig) (cache *Cache, err error) {
+		Create: func(c *config.CacheConfig) (cache cache.ICache, err error) {
 			opts, err := redis.ParseURL(c.CacheUri)
 			if err != nil {
 				return nil, err
@@ -65,15 +71,16 @@ func init() {
 
 			slog.Info(fmt.Sprintf("redis connected URI:%s Version:%s", c.CacheUri, version))
 
-			cache = &Cache{
-				Impl:    rdb,
-				Version: version,
-			}
+			redisCache := &Cache{}
 
-			return cache, nil
+			redisCache.Impl = rdb
+
+			return redisCache, nil
 		},
 	})
 }
+
+///
 
 func GetRDB(cache *Cache) *redis.Client {
 	if rdb, ok := cache.Impl.(*redis.Client); ok {
@@ -113,14 +120,21 @@ func (c *Cache) Read(ctx context.Context, key string) (string, error) {
 		return "", httperror.GenericError("Redis client not available", http.StatusInternalServerError)
 
 	}
-	return rdb.Get(ctx, key).Result()
+	r, err := rdb.Get(ctx, key).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", fmt.Errorf("redis get key %s missing: %w", key, err)
+		}
+		return "", fmt.Errorf("redis get key %s error: %w", key, err)
+	}
+
+	return r, nil
 }
 
 func (c *Cache) GetHash(ctx context.Context, key string) (map[string]string, error) {
 	rdb := GetRDB(c)
 	if rdb == nil {
 		return nil, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
-
 	}
 
 	fields, err := rdb.HGetAll(ctx, key).Result()
@@ -189,7 +203,7 @@ type FieldValue struct {
 
 // SetHashFieldsTTL perform HSET then HEXPIRE
 // NOTE: require redis version 7.4+
-func (c *Cache) SetHashFieldsTTL(ctx context.Context, hashKey string, fieldValues []FieldValue) error {
+func (c *Cache) SetHashFieldsTTL(ctx context.Context, hashKey string, fieldValues []cache.FieldValue) error {
 	rdb := GetRDB(c)
 	if rdb == nil {
 		return httperror.GenericError("Redis client not available", http.StatusInternalServerError)
@@ -238,4 +252,41 @@ func (c *Cache) Expire(ctx context.Context, key string, expiration time.Duration
 	}
 
 	return rdb.Expire(ctx, key, expiration).Err()
+}
+
+func (c *Cache) TTL(ctx context.Context, key string) (time.Duration, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return 0, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+
+	return rdb.PTTL(ctx, key).Result()
+}
+
+func (c *Cache) ReadWithTTL(ctx context.Context, key string) (string, time.Duration, error) {
+	rdb := GetRDB(c)
+	if rdb == nil {
+		return "", 0, httperror.GenericError("Redis client not available", http.StatusInternalServerError)
+	}
+
+	pipe := rdb.Pipeline()
+	getCmd := pipe.Get(ctx, key)
+	ttlCmd := pipe.TTL(ctx, key)
+
+	_, err := pipe.Exec(ctx)
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return "", 0, err
+	}
+
+	value, err := getCmd.Result()
+	if err != nil {
+		return "", 0, err
+	}
+
+	ttl, err := ttlCmd.Result()
+	if err != nil {
+		return "", 0, err
+	}
+
+	return value, ttl, nil
 }

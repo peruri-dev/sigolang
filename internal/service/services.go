@@ -12,7 +12,7 @@ import (
 
 type Services struct {
 	DB    *bun.DB
-	Cache *cache.Cache
+	Cache cache.ICache
 	Resty *resty.Client
 }
 
